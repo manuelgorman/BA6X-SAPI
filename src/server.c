@@ -10,12 +10,16 @@
 #include <netinet/in.h>
 #include <pthread.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "../include/hidapi.h"
 #include "../include/common.h"
 
+int fd, confd, sockfd;
+
 void handle_read(int confd);
 void * doit(void * arg);
+void intHandler(int dummy);
 
 /*
  * Communication pour BA6X
@@ -26,11 +30,12 @@ void * doit(void * arg);
 
 int main(int argc, char * argv[]) {
 
-	int fd, confd, sockfd;
 	struct sockaddr_in addr;
 	struct sockaddr_in cli_addr;
 	socklen_t cli_addr_len;
 	pthread_t tid;
+
+  signal(SIGINT, intHandler);
 
 	memset(&addr, 0, sizeof(addr));
 	memset(&cli_addr, 0, sizeof(cli_addr));
@@ -88,7 +93,7 @@ void * doit(void * arg) {
 void handle_read(int confd) {
 
 	unsigned char buf[MAX_STR];
-	int num = 0, nParam = 0;
+	int num = 0, nParam = 0, i = 0, j =0;
 
   unsigned char **pch = calloc(5, sizeof(unsigned char*));
 
@@ -110,6 +115,7 @@ void handle_read(int confd) {
      * print|UnMessageLigne1|UnMessageLigne2
      * product|Designation|Poids|Prix\Qte
      * clean
+     * exit
     */
 
     if (!strcmp(pch[0], "print")) {
@@ -125,11 +131,20 @@ void handle_read(int confd) {
         }
 
       }else{
+
         pthread_mutex_lock(&displayLock);
+
         sendBuffer(display, SEQ_CLEAR); //Nettoyage
-        setCursor(display, 1, 1); //Positionnement du curseur
+        setCursor(display, 1, 0); //Positionnement du curseur
         sendBuffer(display, pch[1]); //Le buffer
+
+        if (nParam == 3) {
+          setCursor(display, 2, 0); //Positionnement du curseur
+          sendBuffer(display, pch[2]); //Ligne 2
+        }
+
         pthread_mutex_unlock(&displayLock);
+
       }
 
     }else if(!strcmp(pch[0], "clean")) {
@@ -147,7 +162,7 @@ void handle_read(int confd) {
 
         pthread_mutex_lock(&displayLock);
         sendBuffer(display, SEQ_CLEAR); //Nettoyage
-        setCursor(display, 1, 1); //Positionnement du curseur
+        setCursor(display, 0, 0); //Positionnement du curseur
         pthread_mutex_unlock(&displayLock);
 
       }
@@ -170,16 +185,41 @@ void handle_read(int confd) {
 
         sendBuffer(display, pch[1]); //Designation
 
-        setCursor(display, 1+strlen(pch[1]), 1); //Positionnement du curseur
+        fprintf(stdout, "<Debug> Y = %lu, strlen = %lu\n", 20-strlen(pch[2]), strlen(pch[2]));
+        setCursor(display, 1, 16); //Positionnement du curseur
         sendBuffer(display, pch[2]); //Poids
 
-        setCursor(display, 1, 2); //Positionnement du curseur
+        setCursor(display, 2, 1); //Positionnement du curseur
         sendBuffer(display, pch[3]); //Prix
+
+        setCursor(display, 2, (unsigned char)strlen(pch[4])); //Positionnement du curseur
+        sendBuffer(display, pch[4]); //Qte
 
         pthread_mutex_unlock(&displayLock);
 
       }
 
+    }else if(!strcmp(pch[0], "rainbow")) {
+
+      pthread_mutex_lock(&displayLock);
+      sendBuffer(display, SEQ_CLEAR); //Nettoyage
+
+      for (i = 1; i < 3; i++) {
+
+        for (j = 1; j < 21; j++) {
+
+          fprintf(stdout, "<Debug> X = %i ; Y = %i\n", i, j);
+          //sendBuffer(display, SEQ_CLEAR); //Nettoyage
+          setCursor(display, i, j); //Positionnement du curseur
+          sendBuffer(display, "+"); //Designation
+          sleep(1);
+
+        }
+
+      }
+
+
+      pthread_mutex_unlock(&displayLock);
 
     }else if(!strcmp(pch[0], "exit")) { /* Exit client handler */
       break;
@@ -208,6 +248,7 @@ void handle_read(int confd) {
 	}
 	else if(num < 0) {
 		fprintf(stdout, "<Serveur> La trame de connexion est mauvaise, refus.\n");
+    exit(-1);
 	}
 }
 
@@ -249,4 +290,12 @@ void replace(unsigned char *src, unsigned char occ, unsigned char new) {
       src[i] = new;
     }
   }
+}
+
+void intHandler(int dummy) {
+    fprintf(stdout, "<Debug> Event CTRL+C catched\n");
+    /* Ferme socket */
+    close(fd);
+    /* Libére l'affichage */
+    freeDevice();
 }
