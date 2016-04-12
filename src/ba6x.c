@@ -27,7 +27,7 @@ const unsigned char SEQ_FR[4] = {0x1B, 0x52, 0x01, 0x00};
 const unsigned char SEQ_CHARSET[4] = {0x1B, 0x52, 0x31, 0x00};
 unsigned char SEQ_CURSOR[7] = {0x1B, 0x5B, 0x31, 0x3B, 0x31, 0x48, 0x00};
 
-void prepareBuffer(unsigned char *sequence, unsigned char size) {
+void prepareBuffer(const unsigned char *sequence, unsigned char size) {
 
   if (size > BA6X_BYTES) {
     fprintf(stderr, "<Pilote> Impossible de transmettre une sequence > 29 bytes!\n");
@@ -46,7 +46,7 @@ void prepareBuffer(unsigned char *sequence, unsigned char size) {
   }
 }
 
-void sendBuffer(hid_device *display, unsigned char *sequence) {
+void sendBuffer(hid_device *display, const unsigned char *sequence) {
   prepareBuffer(sequence, strlen(sequence));
   hid_write(display, buffer, BA6X_LEN);
 }

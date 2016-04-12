@@ -28,8 +28,8 @@ extern const unsigned char SEQ_FR[4];
 extern const unsigned char SEQ_CHARSET[4];
 extern unsigned char SEQ_CURSOR[7];
 
-void prepareBuffer(unsigned char *sequence, unsigned char size);
-void sendBuffer(hid_device *display, unsigned char *sequence);
+void prepareBuffer(const unsigned char *sequence, unsigned char size);
+void sendBuffer(hid_device *display, const unsigned char *sequence);
 void setCursor(hid_device *display, unsigned short x, unsigned short y);
 int initializeDevice();
 int freeDevice();

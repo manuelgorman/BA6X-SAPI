@@ -19,7 +19,6 @@ int fd, confd, sockfd;
 
 void handle_read(int confd);
 void * doit(void * arg);
-void intHandler(int dummy);
 
 /*
  * Communication pour BA6X
@@ -32,10 +31,8 @@ int main(int argc, char * argv[]) {
 
 	struct sockaddr_in addr;
 	struct sockaddr_in cli_addr;
-	socklen_t cli_addr_len;
+	//socklen_t cli_addr_len;
 	pthread_t tid;
-
-  signal(SIGINT, intHandler);
 
 	memset(&addr, 0, sizeof(addr));
 	memset(&cli_addr, 0, sizeof(cli_addr));
@@ -76,7 +73,7 @@ int main(int argc, char * argv[]) {
 		pthread_create(&tid, NULL, &doit, (void*)&confd);
 	}
 
-  /* Libére l'affichage */
+  /* Libére l'affichage (BA6x USB) */
   freeDevice();
 }
 
@@ -198,29 +195,7 @@ void handle_read(int confd) {
         pthread_mutex_unlock(&displayLock);
 
       }
-
-    }else if(!strcmp(pch[0], "rainbow")) {
-
-      pthread_mutex_lock(&displayLock);
-      sendBuffer(display, SEQ_CLEAR); //Nettoyage
-
-      for (i = 1; i < 3; i++) {
-
-        for (j = 1; j < 21; j++) {
-
-          fprintf(stdout, "<Debug> X = %i ; Y = %i\n", i, j);
-          //sendBuffer(display, SEQ_CLEAR); //Nettoyage
-          setCursor(display, i, j); //Positionnement du curseur
-          sendBuffer(display, "+"); //Designation
-          sleep(1);
-
-        }
-
-      }
-
-
-      pthread_mutex_unlock(&displayLock);
-
+      
     }else if(!strcmp(pch[0], "exit")) { /* Exit client handler */
       break;
     }else{ //No command match
@@ -253,7 +228,8 @@ void handle_read(int confd) {
 }
 
 int extractParams(unsigned char *src, unsigned char **dst) {
-  int nParam = 0, cursor = 0, i = 0;
+  int nParam = 0, cursor = 0;
+  unsigned long i = 0;
 
   fprintf(stdout, "<Debug> Debut extraction des parametres sur (%s)..\n", src);
 
@@ -273,7 +249,7 @@ int extractParams(unsigned char *src, unsigned char **dst) {
       memcpy(dst[nParam], src+cursor, i-cursor);
       dst[nParam][(i-cursor)+1] = '\0';
 
-      if (DEBUG) fprintf(stdout, "<Debug> Allocation d'un parametre (i = %i; cursor = %i) de taille %i avec '%s'\n", i, cursor, i-cursor+1, dst[nParam]);
+      if (DEBUG) fprintf(stdout, "<Debug> Allocation d'un parametre (i = %lu; cursor = %d) de taille %lu avec '%s'\n", i, cursor, i-cursor+1, dst[nParam]);
       nParam++;
       cursor = i+1;
       if(src[i] == '\0') break;
@@ -284,18 +260,10 @@ int extractParams(unsigned char *src, unsigned char **dst) {
 }
 
 void replace(unsigned char *src, unsigned char occ, unsigned char new) {
-  int i = 0;
+  unsigned long i = 0;
   for (i = 0; i < strlen(src); i++) {
     if (src[i] == occ) {
       src[i] = new;
     }
   }
-}
-
-void intHandler(int dummy) {
-    fprintf(stdout, "<Debug> Event CTRL+C catched\n");
-    /* Ferme socket */
-    close(fd);
-    /* Libére l'affichage */
-    freeDevice();
 }
