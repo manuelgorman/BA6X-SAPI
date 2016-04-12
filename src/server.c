@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <netdb.h>
-#include <fcntl.h> 
+#include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -87,30 +87,115 @@ void * doit(void * arg) {
 
 void handle_read(int confd) {
 
-	unsigned char buf[BA6X_BYTES];
-	int num = 0;
+	unsigned char buf[MAX_STR];
+	int num = 0, nParam = 0;
+
+  unsigned char **pch = calloc(5, sizeof(unsigned char*));
 
 	fprintf(stdout, "<Serveur> Lecture de buffer\n");
 
-	while( (num = read(confd, buf, BA6X_BYTES)) > 0) {
+	while( (num = read(confd, buf, MAX_STR)) > 0) {
+
+    /* Telnet */
+    if (DEBUG) replace(buf, '\n', '\0');
+    if (DEBUG) replace(buf, 0xd, '\0');
+    if (DEBUG) replace(buf, 0xa, '\0');
 
 		fprintf(stdout, "<Serveur> Client %i demande '%s'..\n", confd, buf);
 
-    pthread_mutex_lock(&displayLock);
+    nParam = extractParams(buf, pch);
 
-    sendBuffer(display, SEQ_CLEAR); //Nettoyage
-    sendBuffer(display, SEQ_CURSOR); //Positionnement du curseur
-    sendBuffer(display, buf); //Le buffer
+    /*
+     * Communication pour BA6X
+     * print|UnMessageLigne1|UnMessageLigne2
+     * product|Designation|Poids|Prix\Qte
+     * clean
+    */
 
-    pthread_mutex_unlock(&displayLock);
+    if (!strcmp(pch[0], "print")) {
 
-		if(write(confd, buf, num) == -1)
-		{
-			fprintf(stdout, "<Serveur> Impossible d'ecrire sur le buffer de sortie\n");
-			break;
-		}
+      if (nParam < 2) {
 
-    memset(buf, 0, BA6X_BYTES);
+        fprintf(stderr, "<Pilote> Mauvais nombre de paramètres pour 'clean', %i obtenu(s), 1 demandé(s) !\n", nParam-1);
+
+        if(write(confd, FAILED_PARAMS, strlen(FAILED_PARAMS)+1) == -1)
+        {
+          fprintf(stdout, "<Serveur> Impossible d'ecrire sur le buffer de sortie\n");
+          break;
+        }
+
+      }else{
+        pthread_mutex_lock(&displayLock);
+        sendBuffer(display, SEQ_CLEAR); //Nettoyage
+        setCursor(display, 1, 1); //Positionnement du curseur
+        sendBuffer(display, pch[1]); //Le buffer
+        pthread_mutex_unlock(&displayLock);
+      }
+
+    }else if(!strcmp(pch[0], "clean")) {
+
+      if (nParam != 1) {
+        fprintf(stderr, "<Pilote> Mauvais nombre de paramètres pour 'clean', %i obtenu(s), 0 demandé(s) !\n", nParam-1);
+
+        if(write(confd, FAILED_PARAMS, strlen(FAILED_PARAMS)+1) == -1)
+        {
+          fprintf(stdout, "<Serveur> Impossible d'ecrire sur le buffer de sortie\n");
+          break;
+        }
+
+      }else{
+
+        pthread_mutex_lock(&displayLock);
+        sendBuffer(display, SEQ_CLEAR); //Nettoyage
+        setCursor(display, 1, 1); //Positionnement du curseur
+        pthread_mutex_unlock(&displayLock);
+
+      }
+
+    }else if(!strcmp(pch[0], "product")) {
+
+      if (nParam < 5) {
+        fprintf(stderr, "<Pilote> Mauvais nombre de paramètres pour 'product', %i obtenu(s), 4 demandé(s) !\n", nParam-1);
+
+        if(write(confd, FAILED_PARAMS, strlen(FAILED_PARAMS)+1) == -1)
+        {
+          fprintf(stdout, "<Serveur> Impossible d'ecrire sur le buffer de sortie\n");
+          break;
+        }
+      }else{
+
+        pthread_mutex_lock(&displayLock);
+        sendBuffer(display, SEQ_CLEAR); //Nettoyage
+        setCursor(display, 1, 1); //Positionnement du curseur
+
+        sendBuffer(display, pch[1]); //Designation
+
+        setCursor(display, 1+strlen(pch[1]), 1); //Positionnement du curseur
+        sendBuffer(display, pch[2]); //Poids
+
+        setCursor(display, 1, 2); //Positionnement du curseur
+        sendBuffer(display, pch[3]); //Prix
+
+        pthread_mutex_unlock(&displayLock);
+
+      }
+
+
+    }else if(!strcmp(pch[0], "exit")) { /* Exit client handler */
+      break;
+    }else{ //No command match
+
+      fprintf(stderr, "<Pilote> Commande inconnue: %s\n", pch[0]);
+
+      if(write(confd, UNKNOWN_COMMAND, strlen(UNKNOWN_COMMAND)+1) == -1)
+      {
+        fprintf(stdout, "<Serveur> Impossible d'ecrire sur le buffer de sortie\n");
+        break;
+      }
+
+    }
+
+    memset(buf, 0, MAX_STR);
 
 	}
 
@@ -124,4 +209,44 @@ void handle_read(int confd) {
 	else if(num < 0) {
 		fprintf(stdout, "<Serveur> La trame de connexion est mauvaise, refus.\n");
 	}
+}
+
+int extractParams(unsigned char *src, unsigned char **dst) {
+  int nParam = 0, cursor = 0, i = 0;
+
+  fprintf(stdout, "<Debug> Debut extraction des parametres sur (%s)..\n", src);
+
+  for (i = 0; i < NB_PARAMS; i++) {
+    if (dst[i]) {
+      fprintf(stdout, "<Info> Libération d'espace mémoire sur **dst !\n");
+      free(dst[i]);
+      dst[i] = NULL;
+    }
+  }
+
+  for (i = 0; i < strlen(src)+1; i++) {
+    if (src[i] == '|' || src[i] == '\0') {
+
+      dst[nParam] = calloc((i-cursor)+1, sizeof(unsigned char));
+
+      memcpy(dst[nParam], src+cursor, i-cursor);
+      dst[nParam][(i-cursor)+1] = '\0';
+
+      if (DEBUG) fprintf(stdout, "<Debug> Allocation d'un parametre (i = %i; cursor = %i) de taille %i avec '%s'\n", i, cursor, i-cursor+1, dst[nParam]);
+      nParam++;
+      cursor = i+1;
+      if(src[i] == '\0') break;
+    }
+  }
+
+  return nParam;
+}
+
+void replace(unsigned char *src, unsigned char occ, unsigned char new) {
+  int i = 0;
+  for (i = 0; i < strlen(src); i++) {
+    if (src[i] == occ) {
+      src[i] = new;
+    }
+  }
 }
