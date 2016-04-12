@@ -15,7 +15,7 @@ Communicate with Wincor Nixdorf displays like BA63 USB (Socket API)
 
 # CMD List
 
-> print|Line1|Line2
-> clean
-> product|Name|Weight|Price|Qty
-> exit
+> - print|Line1|Line2
+> - clean
+> - product|Name|Weight|Price|Qty
+> - exit
