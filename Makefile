@@ -9,3 +9,6 @@ ba6x.o: src/ba6x.c
 
 clean:
 	@rm -f *.o
+
+install:
+	@cp bin/display /usr/local/bin/display
