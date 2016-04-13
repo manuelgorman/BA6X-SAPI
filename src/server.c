@@ -90,6 +90,7 @@ void * doit(void * arg) {
 void handle_read(int confd) {
 
 	unsigned char buf[MAX_STR];
+	unsigned char tronq[BA6X_LINE_MAX];
 	int num = 0, nParam = 0, i = 0, j =0;
 
   unsigned char **pch = calloc(5, sizeof(unsigned char*));
@@ -133,11 +134,27 @@ void handle_read(int confd) {
 
         sendBuffer(display, SEQ_CLEAR); //Nettoyage
         setCursor(display, 1, 0); //Positionnement du curseur
-        sendBuffer(display, pch[1]); //Le buffer
 
-        if (nParam == 3) {
-          setCursor(display, 2, 0); //Positionnement du curseur
-          sendBuffer(display, pch[2]); //Ligne 2
+				//On vérifie la taille du texte pour tonquer
+				if (strlen(pch[1]) > BA6X_LINE_MAX) {
+					if (DEBUG) fprintf(stdout, "<Pilote> Taille de ligne 1 trop grande, tronquage..\n");
+					tronquer(pch[1], tronq, BA6X_LINE_MAX);
+					sendBuffer(display, tronq); //Le buffer
+				}else{
+					sendBuffer(display, pch[1]); //Le buffer
+				}
+
+				if (nParam == 3) {
+					setCursor(display, 2, 0); //Positionnement du curseur
+
+					if (strlen(pch[1]) > BA6X_LINE_MAX) {
+						if (DEBUG) fprintf(stdout, "<Pilote> Taille de ligne 2 trop grande, tronquage..\n");
+						tronquer(pch[2], tronq, BA6X_LINE_MAX);
+						sendBuffer(display, tronq); //Le buffer
+					}else{
+						sendBuffer(display, pch[2]); //Le buffer
+					}
+
         }
 
         pthread_mutex_unlock(&displayLock);
@@ -163,7 +180,7 @@ void handle_read(int confd) {
         pthread_mutex_unlock(&displayLock);
 
       }
-  	
+
     }else if(!strcmp(pch[0], "exit")) { /* Exit client handler */
       break;
     }else{ //No command match
@@ -234,4 +251,13 @@ void replace(unsigned char *src, unsigned char occ, unsigned char new) {
       src[i] = new;
     }
   }
+}
+
+void tronquer(unsigned char *src, unsigned char *dst, int tailleMax) {
+	for (i = 0; i < tailleMax-3; i ++) {
+		dst[i] = src[i];
+	}
+	dst[i] = '.';
+	dst[i+1] = '.';
+	dst[i+2] = '.';
 }
