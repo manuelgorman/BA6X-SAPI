@@ -10,6 +10,8 @@
 #define BA6X_COL 5
 #define BA6X_LINE 7
 
+#define BA6X_LINE_MAX 20
+
 #define MAX_STR 255
 #define BA63_VID 0x0aa7
 #define BA63_PID 0x0200
@@ -36,3 +38,4 @@ int freeDevice();
 
 int extractParams(unsigned char *src, unsigned char **dst);
 void replace(unsigned char *src, unsigned char occ, unsigned char new);
+void tronquer(unsigned char *src, unsigned char *dst, int tailleMax);
