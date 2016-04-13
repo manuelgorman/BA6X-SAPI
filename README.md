@@ -13,9 +13,9 @@ Communicate with Wincor Nixdorf displays like BA63 USB (Socket API)
 - libusb
 - pthread
 
-# CMD List
+# Data
 
 > - print|Line1|Line2
+> - print|Line1
 > - clean
-> - product|Name|Weight|Price|Qty
 > - exit
