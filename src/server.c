@@ -163,39 +163,7 @@ void handle_read(int confd) {
         pthread_mutex_unlock(&displayLock);
 
       }
-
-    }else if(!strcmp(pch[0], "product")) {
-
-      if (nParam < 5) {
-        fprintf(stderr, "<Pilote> Mauvais nombre de paramètres pour 'product', %i obtenu(s), 4 demandé(s) !\n", nParam-1);
-
-        if(write(confd, FAILED_PARAMS, strlen(FAILED_PARAMS)+1) == -1)
-        {
-          fprintf(stdout, "<Serveur> Impossible d'ecrire sur le buffer de sortie\n");
-          break;
-        }
-      }else{
-
-        pthread_mutex_lock(&displayLock);
-        sendBuffer(display, SEQ_CLEAR); //Nettoyage
-        setCursor(display, 1, 1); //Positionnement du curseur
-
-        sendBuffer(display, pch[1]); //Designation
-
-        fprintf(stdout, "<Debug> Y = %lu, strlen = %lu\n", 20-strlen(pch[2]), strlen(pch[2]));
-        setCursor(display, 1, 16); //Positionnement du curseur
-        sendBuffer(display, pch[2]); //Poids
-
-        setCursor(display, 2, 1); //Positionnement du curseur
-        sendBuffer(display, pch[3]); //Prix
-
-        setCursor(display, 2, (unsigned char)strlen(pch[4])); //Positionnement du curseur
-        sendBuffer(display, pch[4]); //Qte
-
-        pthread_mutex_unlock(&displayLock);
-
-      }
-      
+  	
     }else if(!strcmp(pch[0], "exit")) { /* Exit client handler */
       break;
     }else{ //No command match
