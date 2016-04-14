@@ -254,6 +254,8 @@ void replace(unsigned char *src, unsigned char occ, unsigned char new) {
 }
 
 void tronquer(unsigned char *src, unsigned char *dst, int tailleMax) {
+	int i = 0;
+	
 	for (i = 0; i < tailleMax-3; i ++) {
 		dst[i] = src[i];
 	}
