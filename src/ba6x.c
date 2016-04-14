@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include<pthread.h>
+#include <pthread.h>
+#include <wchar.h>
 
 #include "../include/hidapi.h"
 #include "../include/common.h"
@@ -58,8 +59,45 @@ void setCursor(hid_device *display, unsigned short x, unsigned short y) {
 }
 
 int initializeDevice() {
+
+  struct hid_device_info *devs, *cur_dev;
+  const wchar_t targetManufacturer[] = L"Wincor Nixdorf";
+  unsigned short kOSX = 0;
+
   hid_init();
-  display = hid_open(0x0aa7, 0x0200, NULL);
+  //display = hid_open(0x0aa7, 0x0200, NULL);
+  /* Auto-detection du périphérique */
+  //Wincor Nixdorf
+
+	devs = hid_enumerate(0x0, 0x0);
+	cur_dev = devs;
+
+	while (cur_dev) {
+    if (DEBUG) fprintf(stdout, "<Debug> Périphérique trouvé: %04hx %04hx - %ls - %s\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->manufacturer_string ,cur_dev->path);
+
+    #if defined(__APPLE__)
+      if (!wcscmp(targetManufacturer, cur_dev->manufacturer_string) && kOSX++ == 1 ) {
+        fprintf(stdout, "<Pilote> Afficheur USB %04hx %04hx en cours d\'ouverture sur %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
+        display = hid_open_path(cur_dev->path);
+        break;
+      }
+    #elif defined(__LINUX__)
+      if (!wcscmp(targetManufacturer, cur_dev->manufacturer_string) &&  !strcmp(cur_dev->path+(strlen(cur_dev->path)-2), "01")) {
+        fprintf(stdout, "<Pilote> Afficheur USB %04hx %04hx en cours d\'ouverture sur %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
+        display = hid_open_path(cur_dev->path);
+        break;
+      }
+    #else
+      fprintf(stderr, "<Fatal> Ce système n'est pas (encore) supporté pour l'instant!\n");
+      exit(-1);
+    #endif
+
+		cur_dev = cur_dev->next;
+	}
+
+	hid_free_enumeration(devs);
+  if (!display) return 0;
+
   hid_get_product_string(display, moduleName, MAX_STR);
   if (DEBUG) fprintf(stdout, "<Info> Connected to \"%ls\" display.\n", moduleName);
   return display!=NULL;

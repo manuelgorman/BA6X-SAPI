@@ -67,6 +67,7 @@ int main(int argc, char * argv[]) {
   }
 
   sendBuffer(display, SEQ_CHARSET);
+	sendBuffer(display, WELCOME_MESSAGE_0);
 
 	while(1) {
 		confd = accept(fd, NULL, NULL);
@@ -75,6 +76,9 @@ int main(int argc, char * argv[]) {
 
   /* Libére l'affichage (BA6x USB) */
   freeDevice();
+	close(fd);
+
+	return 0;
 }
 
 void * doit(void * arg) {
@@ -255,7 +259,7 @@ void replace(unsigned char *src, unsigned char occ, unsigned char new) {
 
 void tronquer(unsigned char *src, unsigned char *dst, int tailleMax) {
 	int i = 0;
-	
+
 	for (i = 0; i < tailleMax-3; i ++) {
 		dst[i] = src[i];
 	}
