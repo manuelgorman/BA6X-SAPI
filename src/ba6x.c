@@ -62,10 +62,8 @@ int initializeDevice() {
 
   struct hid_device_info *devs, *cur_dev;
   const wchar_t targetManufacturer[] = L"Wincor Nixdorf";
-  unsigned short kOSX = 0;
 
   hid_init();
-  //display = hid_open(0x0aa7, 0x0200, NULL);
   /* Auto-detection du périphérique */
   //Wincor Nixdorf
 
@@ -76,12 +74,12 @@ int initializeDevice() {
     if (DEBUG) fprintf(stdout, "<Debug> Périphérique trouvé: %04hx %04hx - %ls - %s\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->manufacturer_string ,cur_dev->path);
 
     #if defined(__APPLE__)
-      if (!wcscmp(targetManufacturer, cur_dev->manufacturer_string) && kOSX++ == 1 ) {
+      if (!wcscmp(targetManufacturer, cur_dev->manufacturer_string) ) {
         fprintf(stdout, "<Pilote> Afficheur USB %04hx %04hx en cours d\'ouverture sur %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
-        display = hid_open_path(cur_dev->path);
+        display = hid_open(cur_dev->vendor_id, cur_dev->product_id, NULL);
         break;
       }
-    #elif defined(__LINUX__)
+    #elif defined(linux)
       if (!wcscmp(targetManufacturer, cur_dev->manufacturer_string) &&  !strcmp(cur_dev->path+(strlen(cur_dev->path)-2), "01")) {
         fprintf(stdout, "<Pilote> Afficheur USB %04hx %04hx en cours d\'ouverture sur %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
         display = hid_open_path(cur_dev->path);
