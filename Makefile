@@ -1,5 +1,5 @@
 display: server.o ba6x.o
-	gcc server.o ba6x.o -o display -Wpointer-sign -g -lm -L"/usr/local/lib" -lHIDAPI
+	gcc server.o ba6x.o -o display -Wpointer-sign -g -lm -L"/usr/local/lib" -lhidapi-libusb -lpthread
 
 server.o: src/server.c
 	gcc -c src/server.c -Wpointer-sign
