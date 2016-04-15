@@ -1,4 +1,4 @@
-#define DEBUG 1
+#define DEBUG 0
 
 #define SERVER_ADDR "127.0.0.1"
 #define SERVER_PORT 3363
@@ -22,7 +22,7 @@
 #define FAILED_PARAMS "WrongParams"
 #define NB_PARAMS 5
 
-#define WELCOME_MESSAGE_0 "En attente.."
+#define WELCOME_MESSAGE_0 "en attente.."
 
 extern hid_device *display;
 extern pthread_mutex_t displayLock;
