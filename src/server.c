@@ -124,11 +124,11 @@ void handle_read(int confd) {
 
       if (nParam < 2) {
 
-        fprintf(stderr, "<Pilote> Mauvais nombre de paramètres pour 'clean', %i obtenu(s), 1 demandé(s) !\n", nParam-1);
+        fprintf(stderr, "<Driver> Wrong number of settings for 'clean': %i recieved, 1 required!\n", nParam-1);
 
         if(write(confd, FAILED_PARAMS, strlen(FAILED_PARAMS)+1) == -1)
         {
-          fprintf(stdout, "<Serveur> Impossible d'ecrire sur le buffer de sortie\n");
+          fprintf(stdout, "<Server> Can not write to the output buffer\n");
           break;
         }
 
@@ -141,7 +141,7 @@ void handle_read(int confd) {
 
 				//On vérifie la taille du texte pour tonquer
 				if (strlen(pch[1]) > BA6X_LINE_MAX) {
-					if (DEBUG) fprintf(stdout, "<Pilote> Taille de ligne 1 trop grande, tronquage..\n");
+					if (DEBUG) fprintf(stdout, "<Driver> Line size 1 too large, truncating..\n");
 					tronquer(pch[1], tronq, BA6X_LINE_MAX);
 					sendBuffer(display, tronq); //Le buffer
 				}else{
@@ -152,7 +152,7 @@ void handle_read(int confd) {
 					setCursor(display, 2, 0); //Positionnement du curseur
 
 					if (strlen(pch[1]) > BA6X_LINE_MAX) {
-						if (DEBUG) fprintf(stdout, "<Pilote> Taille de ligne 2 trop grande, tronquage..\n");
+						if (DEBUG) fprintf(stdout, "Driver> Line size 2 too large, truncating..\n");
 						tronquer(pch[2], tronq, BA6X_LINE_MAX);
 						sendBuffer(display, tronq); //Le buffer
 					}else{
@@ -168,11 +168,11 @@ void handle_read(int confd) {
     }else if(!strcmp(pch[0], "clean")) {
 
       if (nParam != 1) {
-        fprintf(stderr, "<Pilote> Mauvais nombre de paramètres pour 'clean', %i obtenu(s), 0 demandé(s) !\n", nParam-1);
+        fprintf(stderr, "<Driver> Wrong number of settings for 'clean': %i recieved, 0 required!\n", nParam-1);
 
         if(write(confd, FAILED_PARAMS, strlen(FAILED_PARAMS)+1) == -1)
         {
-          fprintf(stdout, "<Serveur> Impossible d'ecrire sur le buffer de sortie\n");
+          fprintf(stdout, "<Server> Can not write to the output buffer\n");
           break;
         }
 
@@ -189,11 +189,11 @@ void handle_read(int confd) {
       break;
     }else{ //No command match
 
-      fprintf(stderr, "<Pilote> Commande inconnue: %s\n", pch[0]);
+      fprintf(stderr, "<Driver> Unknown command: %s\n", pch[0]);
 
       if(write(confd, UNKNOWN_COMMAND, strlen(UNKNOWN_COMMAND)+1) == -1)
       {
-        fprintf(stdout, "<Serveur> Impossible d'ecrire sur le buffer de sortie\n");
+        fprintf(stdout, "<Server> Can not write to the output buffer\n");
         break;
       }
 
@@ -204,14 +204,14 @@ void handle_read(int confd) {
 	}
 
 	if(num == 0) {
-		fprintf(stdout, "<Serveur> Le client %i a mis fin a la communication\n", confd);
+		fprintf(stdout, "<Server> Client %i terminated the connection\n", confd);
 	}
 	else if(num < 0 && errno == EINTR)
 	{
-		fprintf(stdout, "<Serveur> Le client %i a mis fin a la transmission, timeout ?\n", confd);
+		fprintf(stdout, "<Server> Client %i terminated transmission, timeout?\n", confd);
 	}
 	else if(num < 0) {
-		fprintf(stdout, "<Serveur> La trame de connexion est mauvaise, refus.\n");
+		fprintf(stdout, "<Server> The connection frame is bad, denied\n");
     exit(-1);
 	}
 }
@@ -220,11 +220,11 @@ int extractParams(unsigned char *src, unsigned char **dst) {
   int nParam = 0, cursor = 0;
   unsigned long i = 0;
 
-  fprintf(stdout, "<Debug> Debut extraction des parametres sur (%s)..\n", src);
+  fprintf(stdout, "<Debug> Begin extraction of parameters on (%s)..\n", src);
 
   for (i = 0; i < NB_PARAMS; i++) {
     if (dst[i]) {
-      fprintf(stdout, "<Info> Libération d'espace mémoire sur **dst !\n");
+      fprintf(stdout, "<Info> Free memory space on **dst!\n");
       free(dst[i]);
       dst[i] = NULL;
     }
@@ -238,7 +238,7 @@ int extractParams(unsigned char *src, unsigned char **dst) {
       memcpy(dst[nParam], src+cursor, i-cursor);
       dst[nParam][(i-cursor)+1] = '\0';
 
-      if (DEBUG) fprintf(stdout, "<Debug> Allocation d'un parametre (i = %lu; cursor = %d) de taille %lu avec '%s'\n", i, cursor, i-cursor+1, dst[nParam]);
+      if (DEBUG) fprintf(stdout, "<Debug> Allocation of parameter (i = %lu; cursor = %d), size %lu with '%s'\n", i, cursor, i-cursor+1, dst[nParam]);
       nParam++;
       cursor = i+1;
       if(src[i] == '\0') break;
