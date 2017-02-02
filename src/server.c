@@ -21,10 +21,10 @@ void handle_read(int confd);
 void * doit(void * arg);
 
 /*
- * Communication pour BA6X
- * print|UnMessageLigne1|UnMessageLigne2
- * product|Designation|Poids|Prix\Qte
- * clean
+ * Communication for BA6X
+ * print|Line1|Line2
+	* Product|Designation|Weight|Price\Qte
+	* clean
 */
 
 int main(int argc, char * argv[]) {
@@ -42,14 +42,14 @@ int main(int argc, char * argv[]) {
 	addr.sin_port = htons(SERVER_PORT);
 
 	if( (fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		fprintf(stdout, "<Serveur> Impossible de monter un socket sur l'interface %s\n", SERVER_ADDR);
+		fprintf(stdout, "<Server> Can not open a socket on the interface %s\n", SERVER_ADDR);
 		exit(-1);
 	}else{
-		fprintf(stdout, "<Serveur> Initialisation du socket sur %s\n", SERVER_ADDR);
+		fprintf(stdout, "<Server> Initializing the socket on %s\n", SERVER_ADDR);
 	}
 
 	if(bind(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-		fprintf(stdout, "<Serveur> L'interface %s:%i est impossible d'access !\n", SERVER_ADDR, SERVER_PORT);
+		fprintf(stdout, "<Server> Cannot access interface %s:%i!\n", SERVER_ADDR, SERVER_PORT);
 		exit(-2);
 	}
 
@@ -57,12 +57,12 @@ int main(int argc, char * argv[]) {
 		printf("error to listen the socket\n");
 		exit(-3);
 	}else{
-		fprintf(stdout, "<Serveur> Ecoute sur %s:%i\n", SERVER_ADDR, SERVER_PORT);
+		fprintf(stdout, "<Server> Listening on %s:%i\n", SERVER_ADDR, SERVER_PORT);
 	}
 
   /* Initialisation de la liaison BA6X HID USB */
   if (!initializeDevice()) {
-    fprintf(stderr, "<Pilote> Impossible de se connecter sur le BA63 (USB) !\n");
+    fprintf(stderr, "<Driver> Can not connect to the BA63 (USB)!\n");
     exit(-4);
   }
 
@@ -99,7 +99,7 @@ void handle_read(int confd) {
 
   unsigned char **pch = calloc(5, sizeof(unsigned char*));
 
-	fprintf(stdout, "<Serveur> Lecture de buffer\n");
+	fprintf(stdout, "<Server> Read buffer\n");
 
 	while( (num = read(confd, buf, MAX_STR)) > 0) {
 
@@ -108,7 +108,7 @@ void handle_read(int confd) {
     if (DEBUG) replace(buf, 0xd, '\0');
     if (DEBUG) replace(buf, 0xa, '\0');
 
-		fprintf(stdout, "<Serveur> Client %i demande '%s'..\n", confd, buf);
+		fprintf(stdout, "<Server> Client: %i Command: '%s'..\n", confd, buf);
 
     nParam = extractParams(buf, pch);
 
