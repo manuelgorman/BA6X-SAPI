@@ -31,7 +31,7 @@ unsigned char SEQ_CURSOR[7] = {0x1B, 0x5B, 0x31, 0x3B, 0x31, 0x48, 0x00};
 void prepareBuffer(const unsigned char *sequence, unsigned char size) {
 
   if (size > BA6X_BYTES) {
-    fprintf(stderr, "<Pilote> Impossible de transmettre une sequence > 29 bytes!\n");
+    fprintf(stderr, "<Driver> Can not transmit a sequence> 29 bytes!\n");
     return;
   }
 
@@ -71,22 +71,22 @@ int initializeDevice() {
 	cur_dev = devs;
 
 	while (cur_dev) {
-    if (DEBUG) fprintf(stdout, "<Debug> Périphérique trouvé: %04hx %04hx - %ls - %s\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->manufacturer_string ,cur_dev->path);
+    if (DEBUG) fprintf(stdout, "<Debug> Peripherals found: %04hx %04hx - %ls - %s\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->manufacturer_string ,cur_dev->path);
 
     #if defined(__APPLE__)
       if (!wcscmp(targetManufacturer, cur_dev->manufacturer_string) ) {
-        fprintf(stdout, "<Pilote> Afficheur USB %04hx %04hx en cours d\'ouverture sur %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
+        fprintf(stdout, "<Driver> USB Display: %04hx %04hx on port %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
         display = hid_open(cur_dev->vendor_id, cur_dev->product_id, NULL);
         break;
       }
     #elif defined(linux)
       if (!wcscmp(targetManufacturer, cur_dev->manufacturer_string) &&  !strcmp(cur_dev->path+(strlen(cur_dev->path)-2), "01")) {
-        fprintf(stdout, "<Pilote> Afficheur USB %04hx %04hx en cours d\'ouverture sur %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
+        fprintf(stdout, "<Pilote> USB Display %04hx %04hx on port %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
         display = hid_open_path(cur_dev->path);
         break;
       }
     #else
-      fprintf(stderr, "<Fatal> Ce système n'est pas (encore) supporté pour l'instant!\n");
+      fprintf(stderr, "<Fatal> Device not supported\n");
       exit(-1);
     #endif
 
