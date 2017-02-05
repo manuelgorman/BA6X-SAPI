@@ -23,51 +23,52 @@ unsigned char buffer[BA6X_LEN] = {
   0x00, 0x00
 };
 
-const unsigned char SEQ_CLEAR[5] = {0x1B, 0x5B, 0x32, 0x4A, 0x00};
-const unsigned char SEQ_FR[4] = {0x1B, 0x52, 0x01, 0x00};
-const unsigned char SEQ_CHARSET[4] = {0x1B, 0x52, 0x31, 0x00};
-unsigned char SEQ_CURSOR[7] = {0x1B, 0x5B, 0x31, 0x3B, 0x31, 0x48, 0x00};
+// Byte combinations for each display command
+const unsigned char SEQ_CLEAR[5] = {0x1B, 0x5B, 0x32, 0x4A, 0x00}; //Clear screen
+const unsigned char SEQ_FR[4] = {0x1B, 0x52, 0x01, 0x00}; //?????
+const unsigned char SEQ_CHARSET[4] = {0x1B, 0x52, 0x31, 0x00}; //Set character set
+unsigned char SEQ_CURSOR[7] = {0x1B, 0x5B, 0x31, 0x3B, 0x31, 0x48, 0x00}; //Command to set cursor pos - index 2 is x, 4 is y
 
-void prepareBuffer(const unsigned char *sequence, unsigned char size) {
+void prepareBuffer(const unsigned char *sequence, unsigned char size) { //Why do you need a seperate function to preprare the buffer!? And why doesn't it return anything?
 
   if (size > BA6X_BYTES) {
     fprintf(stderr, "<Driver> Can not transmit a sequence> 29 bytes!\n");
-    return;
+    return; //Not sure why this whole bit is needed
   }
 
   int i = 0;
 
-  memset(buffer, 0x00, BA6X_LEN);
+  memset(buffer, 0x00, BA6X_LEN); // TODO: Google what memset() does
 
   buffer[0] = 0x02;
-  buffer[2] = size;
+  buffer[2] = size; //Why does the screen need to know the size? Bizarre
 
   for (i = 3; i < size+3; i++) {
-    buffer[i] = sequence[i-3];
+    buffer[i] = sequence[i-3]; //Presumably this adds the characters you want to display into the bytes to be sent to the display
   }
 }
 
-void sendBuffer(hid_device *display, const unsigned char *sequence) {
+void sendBuffer(hid_device *display, const unsigned char *sequence) {  //Pretty simple, 'prepares' the buffer to be send then writes it to the HID device
   prepareBuffer(sequence, strlen(sequence));
-  hid_write(display, buffer, BA6X_LEN);
+  hid_write(display, buffer, BA6X_LEN); //Okay so buffer is a global variable. That's FINE. At least the hid library does the complicated stuff for me.
 }
 
-void setCursor(hid_device *display, unsigned short x, unsigned short y) {
-  SEQ_CURSOR[2] = 0x30 + x;
-  SEQ_CURSOR[4] = 0x30 + y;
+void setCursor(hid_device *display, unsigned short x, unsigned short y) { //This function sends the sequence of bytes to change the cursor position
+  SEQ_CURSOR[2] = 0x30 + x; //2 bytes for x
+  SEQ_CURSOR[4] = 0x30 + y; //2 for y (why!? it's a 4 high screen at maximum!)
   sendBuffer(display, SEQ_CURSOR);
 }
 
-int initializeDevice() {
+int initializeDevice() { //The funky stuff
 
-  struct hid_device_info *devs, *cur_dev;
-  const wchar_t targetManufacturer[] = L"Wincor Nixdorf";
+  struct hid_device_info *devs, *cur_dev; //I think this gets or sets some stuff in the hidapi
+  const wchar_t targetManufacturer[] = L"Wincor Nixdorf"; //Almost definitely setting some stuff in the hidapi
 
-  hid_init();
+  hid_init(); //"finalizes the hid api"
   /* Auto-detection du périphérique */
   //Wincor Nixdorf
 
-	devs = hid_enumerate(0x0, 0x0);
+	devs = hid_enumerate(0x0, 0x0); //I should read the documentation on hidapi
 	cur_dev = devs;
 
 	while (cur_dev) {
