@@ -27,7 +27,7 @@
 extern hid_device *display;
 extern pthread_mutex_t displayLock;
 extern unsigned char buffer[BA6X_LEN];
-extern const unsigned char SEQ_CLEAR[10];
+extern const unsigned char SEQ_CLEAR[11];
 extern const unsigned char SEQ_FR[4];
 extern const unsigned char SEQ_CHARSET[4];
 extern unsigned char SEQ_CURSOR[7];
