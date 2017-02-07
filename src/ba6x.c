@@ -26,7 +26,7 @@ unsigned char buffer[BA6X_LEN] = {
 // Byte combinations for each display command
 const unsigned char SEQ_CLEAR[5] = {0x1B, 0x5B, 0x32, 0x4A, 0x00}; //Clear screen
 const unsigned char SEQ_FR[4] = {0x1B, 0x52, 0x01, 0x00}; //?????
-const unsigned char SEQ_CHARSET[4] = {0x1B, 0x52, 0x31, 0x00}; //Set character set
+const unsigned char SEQ_CHARSET[4] = {0x1B, 0x52, 0x31, 0x03}; //character set
 unsigned char SEQ_CURSOR[7] = {0x1B, 0x5B, 0x31, 0x3B, 0x31, 0x48, 0x00}; //Command to set cursor pos - index 2 is x, 4 is y
 
 void prepareBuffer(const unsigned char *sequence, unsigned char size) { //Why do you need a seperate function to preprare the buffer!? And why doesn't it return anything?

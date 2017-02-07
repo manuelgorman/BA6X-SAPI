@@ -22,7 +22,7 @@
 #define FAILED_PARAMS "WrongParams"
 #define NB_PARAMS 5
 
-#define WELCOME_MESSAGE_0 "waiting.."
+#define WELCOME_MESSAGE_0 "Oi oi"
 
 extern hid_device *display;
 extern pthread_mutex_t displayLock;

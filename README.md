@@ -1,5 +1,6 @@
 # BA6X-SAPI
 Communicate with Wincor Nixdorf displays like BA63 USB (Socket API)
+This is intended to replace the original repo of the same name with something that can be called from the command line
 
 > **How to:**
 
@@ -12,10 +13,3 @@ Communicate with Wincor Nixdorf displays like BA63 USB (Socket API)
 - libhidapi
 - libusb
 - pthread
-
-# Data
-
-> - print|Line1|Line2
-> - print|Line1
-> - clean
-> - exit
