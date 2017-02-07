@@ -30,18 +30,21 @@ const unsigned char SEQ_CHARSET[4] = {0x1B, 0x52, 0x31, 0x03}; //character set
 unsigned char SEQ_CURSOR[7] = {0x1B, 0x5B, 0x31, 0x3B, 0x31, 0x48, 0x00}; //Command to set cursor pos - index 2 is x, 4 is y
 
 void prepareBuffer(const unsigned char *sequence, unsigned char size) { //Why do you need a seperate function to preprare the buffer!? And why doesn't it return anything?
-
-/*  if (size > BA6X_BYTES) {
+  /*  Checks if sequence of bytes is correct length,
+   *  allocates memory for the buffer variable
+   *  and prepends the "Write command" instruction bytes
+   */
+     if (size > BA6X_BYTES) {
     fprintf(stderr, "<Driver> Can not transmit a sequence> 29 bytes!\n");
-    return; //Not sure why this whole bit is needed
-  }*/
+    return; //The screen only accepts 32 bytes at a time,
+  }
 
   int i = 0;
 
-  memset(buffer, 0x00, BA6X_LEN); // TODO: Google what memset() does
+  memset(buffer, 0x00, BA6X_LEN); // Allocates 32 bytes of memory, set all to 0
 
-  buffer[0] = 0x02;
-  buffer[2] = size; //Why does the screen need to know the size? Bizarre
+  buffer[0] = 0x02; //First byte is 2, not sure about the second?
+  buffer[2] = size; //Size of data we are sending
 
   for (i = 3; i < size+3; i++) {
     buffer[i] = sequence[i-3]; //Presumably this adds the characters you want to display into the bytes to be sent to the display
