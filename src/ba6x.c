@@ -24,7 +24,7 @@ unsigned char buffer[BA6X_LEN] = {
 };
 
 // Byte combinations for each display command
-const unsigned char SEQ_CLEAR[5] = {0x1B, 0x5B, 0x32, 0x4A, 0x00}; //Clear screen
+const unsigned char SEQ_CLEAR[4] = {0x1B, 0x5B, 0x32, 0x4A}; //Clear screen
 const unsigned char SEQ_FR[4] = {0x1B, 0x52, 0x01, 0x00}; //?????
 const unsigned char SEQ_CHARSET[4] = {0x1B, 0x52, 0x31, 0x03}; //character set
 unsigned char SEQ_CURSOR[7] = {0x1B, 0x5B, 0x31, 0x3B, 0x31, 0x48, 0x00}; //Command to set cursor pos - index 2 is x, 4 is y
@@ -76,13 +76,13 @@ int initializeDevice() { //The funky stuff
 
     #if defined(__APPLE__)
       if (!wcscmp(targetManufacturer, cur_dev->manufacturer_string) ) {
-        fprintf(stdout, "<Driver> USB Display: %04hx %04hx on port %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
+        fprintf(stdout, "<Driver - M> USB Display: %04hx %04hx on port %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
         display = hid_open(cur_dev->vendor_id, cur_dev->product_id, NULL);
         break;
       }
     #elif defined(linux)
       if (!wcscmp(targetManufacturer, cur_dev->manufacturer_string) &&  !strcmp(cur_dev->path+(strlen(cur_dev->path)-2), "01")) {
-        fprintf(stdout, "<Pilote> USB Display %04hx %04hx on port %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
+        fprintf(stdout, "<Driver - L> USB Display %04hx %04hx on port %s..\n", cur_dev->vendor_id, cur_dev->product_id, cur_dev->path);
         display = hid_open_path(cur_dev->path);
         break;
       }
