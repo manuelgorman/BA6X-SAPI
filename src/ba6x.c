@@ -31,10 +31,10 @@ unsigned char SEQ_CURSOR[7] = {0x1B, 0x5B, 0x31, 0x3B, 0x31, 0x48, 0x00}; //Comm
 
 void prepareBuffer(const unsigned char *sequence, unsigned char size) { //Why do you need a seperate function to preprare the buffer!? And why doesn't it return anything?
 
-  if (size > BA6X_BYTES) {
+/*  if (size > BA6X_BYTES) {
     fprintf(stderr, "<Driver> Can not transmit a sequence> 29 bytes!\n");
     return; //Not sure why this whole bit is needed
-  }
+  }*/
 
   int i = 0;
 

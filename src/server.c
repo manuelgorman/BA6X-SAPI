@@ -125,7 +125,7 @@ void handle_read(int confd) {
 
       if (nParam < 2) {
 
-        fprintf(stderr, "<Driver> Wrong number of settings for 'clean': %i recieved, 1 required!\n", nParam-1);
+        fprintf(stderr, "<Driver> Wrong number of settings for 'print': %i recieved, 1 required!\n", nParam-1);
 
         if(write(confd, FAILED_PARAMS, strlen(FAILED_PARAMS)+1) == -1)
         {
