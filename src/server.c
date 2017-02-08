@@ -67,7 +67,7 @@ int main(int argc, char * argv[]) {
   }
 
   sendBuffer(display, SEQ_CHARSET);
-	setCursor(display, 0, 0);
+	setCursor(display, 0, 1);
 	sendBuffer(display, SEQ_CLEAR);
 	sendBuffer(display, WELCOME_MESSAGE_0);
 
