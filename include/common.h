@@ -22,7 +22,7 @@
 #define FAILED_PARAMS "WrongParams"
 #define NB_PARAMS 5
 
-#define WELCOME_MESSAGE_0 "Testcunt"
+#define WELCOME_MESSAGE_0 "Fair play to ye"
 
 extern hid_device *display;
 extern pthread_mutex_t displayLock;
