@@ -29,54 +29,11 @@ void * doit(void * arg);
 
 int main(int argc, char * argv[]) {
 
-	struct sockaddr_in addr;
-	struct sockaddr_in cli_addr;
-	//socklen_t cli_addr_len;
-	pthread_t tid;
-
-	memset(&addr, 0, sizeof(addr));
-	memset(&cli_addr, 0, sizeof(cli_addr));
-
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = inet_addr(SERVER_ADDR);
-	addr.sin_port = htons(SERVER_PORT);
-
-	if( (fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-		fprintf(stdout, "<Server> Can not open a socket on the interface %s\n", SERVER_ADDR);
-		exit(-1);
-	}else{
-		fprintf(stdout, "<Server> Initializing the socket on %s\n", SERVER_ADDR);
-	}
-
-	if(bind(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-		fprintf(stdout, "<Server> Cannot access interface %s:%i!\n", SERVER_ADDR, SERVER_PORT);
-		exit(-2);
-	}
-
-	if(listen(fd, BACKLOG) == -1) {
-		printf("error to listen the socket\n");
-		exit(-3);
-	}else{
-		fprintf(stdout, "<Server> Listening on %s:%i\n", SERVER_ADDR, SERVER_PORT);
-	}
-
-  /* Initialisation de la liaison BA6X HID USB */
-  if (!initializeDevice()) {
-    fprintf(stderr, "<Driver> Can not connect to the BA63 (USB)!\n");
-    exit(-4);
-  }
-
   sendBuffer(display, SEQ_CHARSET);
 	setCursor(display, 0, 1);
 	sendBuffer(display, SEQ_CLEAR);
 	sendBuffer(display, WELCOME_MESSAGE_0);
 
-	while(1) {
-		confd = accept(fd, NULL, NULL);
-		pthread_create(&tid, NULL, &doit, (void*)&confd);
-	}
-
-  /* Libére l'affichage (BA6x USB) */
   freeDevice();
 	close(fd);
 

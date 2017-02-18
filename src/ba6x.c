@@ -43,8 +43,8 @@ void prepareBuffer(const unsigned char *sequence, unsigned char size) { //Why do
 
   memset(buffer, 0x00, BA6X_LEN); // Allocates 32 bytes of memory, set all to 0
 
-  buffer[0] = 0x02; //First byte is 2, not sure about the second?
-  buffer[2] = size; //Size of data we are sending
+  buffer[0] = 0x02; //0x02 0x00 for "write" command
+  buffer[2] = size; //3rd byte is size of data we are sending
 
   for (i = 3; i < size+3; i++) {
     buffer[i] = sequence[i-3]; //Presumably this adds the characters you want to display into the bytes to be sent to the display
