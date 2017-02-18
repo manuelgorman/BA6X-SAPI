@@ -52,7 +52,7 @@ void handle_read(int confd) {
 
 	while( (num = read(confd, buf, MAX_STR)) > 0) {
 
-    /* Telnet 
+    /* Telnet
     if (DEBUG) replace(buf, '\n', '\0');
     if (DEBUG) replace(buf, 0xd, '\0');
     if (DEBUG) replace(buf, 0xa, '\0');
@@ -134,7 +134,7 @@ void handle_read(int confd) {
 
       }
 
-    }else if(!strcmp(pch[0], "exit")) { /* Exit client handler */
+    }else if(!strcmp(pch[0], "exit")) { /* Exit client handler 
       break;
     }else{ //No command match
 
