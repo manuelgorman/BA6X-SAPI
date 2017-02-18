@@ -35,7 +35,7 @@ void prepareBuffer(const unsigned char *sequence, unsigned char size) { //Why do
    *  and prepends the "Write command" instruction bytes
    */
      if (size > BA6X_BYTES) {
-    fprintf(stderr, "<Driver> Can not transmit a sequence> 29 bytes!\n");
+    fprintf(stderr, "<Driver> Can not transmit a sequence> 29 bytes! %s recieved.\n", size);
     return; //The screen only accepts 32 bytes at a time,
   }
 

@@ -17,8 +17,7 @@
 
 int fd, confd, sockfd;
 
-void handle_read(int confd);
-void * doit(void * arg);
+//void handle_read(int confd);
 
 /*
  * Communication for BA6X
@@ -40,16 +39,7 @@ int main(int argc, char * argv[]) {
 	return 0;
 }
 
-void * doit(void * arg) {
-
-	int confd = *(int*)arg;
-	pthread_detach(pthread_self());
-	handle_read(confd);
-	close(confd);
-	return NULL;
-
-}
-
+/*
 void handle_read(int confd) {
 
 	unsigned char buf[MAX_STR];
@@ -62,7 +52,7 @@ void handle_read(int confd) {
 
 	while( (num = read(confd, buf, MAX_STR)) > 0) {
 
-    /* Telnet */
+    /* Telnet 
     if (DEBUG) replace(buf, '\n', '\0');
     if (DEBUG) replace(buf, 0xd, '\0');
     if (DEBUG) replace(buf, 0xa, '\0');
@@ -77,7 +67,7 @@ void handle_read(int confd) {
      * product|Designation|Poids|Prix\Qte
      * clean
      * exit
-    */
+
 
     if (!strcmp(pch[0], "print")) {
 
@@ -174,7 +164,7 @@ void handle_read(int confd) {
     exit(-1);
 	}
 }
-
+*/
 int extractParams(unsigned char *src, unsigned char **dst) {
   int nParam = 0, cursor = 0;
   unsigned long i = 0;
